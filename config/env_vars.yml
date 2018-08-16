@@ -30,7 +30,8 @@ install_logging: true
 #ovs_plugin: "subnet" # This can also be set to: "multitenant" or "networkpolicy"
 ovs_plugin: "multitenant" # This can also be set to: "multitenant" or "networkpolicy"
 multi_tenant_setting: "os_sdn_network_plugin_name='redhat/openshift-ovs-{{ovs_plugin}}'"
-master_lb_dns: "loadbalancer1.{{subdomain_base}}"
+master_lb_dns: "loadbalancer.{{subdomain_base}}"
+master_lb_internal: "loadbalancer1.{{zone_internal_dns}}"
 cloudapps_suffix: 'apps.{{subdomain_base}}'
 openshift_master_ldap_ca_file: 'openshift_master_ldap_ca_file=/root/ca.crt'
 container_runtime: 'docker'
@@ -38,6 +39,7 @@ install_glusterfs: false
 install_lets_encrypt_certificates: false
 install_openwhisk: false
 install_idm: false
+htpasswd_file: "{{ANSIBLE_REPO_PATH}}/config/htpasswd"
 
  ## If you are not part of GPTE you don't need this.
 opentlc_integration: true

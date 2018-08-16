@@ -17,10 +17,23 @@ if [ "${MYUID}" -ne 0 ]; then
 
 fi
 
+HOSTN=`hostname`
+if [[ "${HOSTN}" =~ bastion\..*\.example\.opentlc\.com ]]; then
+
+  GUID=`echo ${HOSTN} | sed -e 's/^bastion\.//' -e 's/\..*//g'`
+  
+fi
+
 #
 # Get info we need
 #
-if [ "$#" -ne 1 ]; then
+if [ -n "${GUID}" ]; then
+
+  echo ""
+  echo "Found GUID ${GUID}"
+  echo ""
+
+elif [ "$#" -ne 1 ]; then
 
   echo ""
   echo "Usage:"
@@ -29,21 +42,29 @@ if [ "$#" -ne 1 ]; then
   echo ""
   exit 1
 
+else
+
+  GUID=${1}
+
 fi
 
-GUID=${1}
 
-echo ""
-echo "Building OCP inventory for ${GUID}"
-echo ""
-ansible-playbook -i /etc/ansible/hosts -e "osrelease=3.9" -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" -e "internaldns=internal" config/setup_hosts.yml
+#echo ""
+#echo "Building OCP inventory for ${GUID}"
+#echo ""
+#ansible-playbook -i /etc/ansible/hosts -e "osrelease=3.9" -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" -e "internaldns=internal" config/setup_hosts.yml
 
 
 #echo ""
 #echo "Building OCP cluster on ${GUID}"
 #echo ""
-#
-#ansible-playbook -i 127.0.0.1, ansible/main.yml -e "env_type=config-name" -e "aws_region=ap-southeast-2" -e "guid=${GUID}"
-#
+#ansible-playbook -i workdir/hosts -f 20 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml
+
+ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
+
+echo ""
+echo "Setup storage for OCP cluster on ${GUID}"
+echo ""
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" config/setup_storage.yml
 
 

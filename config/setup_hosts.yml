@@ -12,8 +12,6 @@
   tasks:
     - name: generate ansible hosts file
       template:
-#        src: "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/files/hosts_template.{{ osrelease }}.j2"
-#        dest: "{{ ANSIBLE_REPO_PATH }}/workdir/hosts-{{ env_type }}-{{ guid }}"
         src: "{{ ANSIBLE_REPO_PATH }}/config/hosts_template.{{ osrelease }}.j2"
         dest: "{{ ANSIBLE_REPO_PATH }}/workdir/hosts"
       when:
