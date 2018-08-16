@@ -49,17 +49,27 @@ else
 fi
 
 
-#echo ""
-#echo "Building OCP inventory for ${GUID}"
-#echo ""
-#ansible-playbook -i /etc/ansible/hosts -e "osrelease=3.9" -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" -e "internaldns=internal" config/setup_hosts.yml
+echo ""
+echo "Building OCP inventory for ${GUID}"
+echo ""
+ansible-playbook -i /etc/ansible/hosts -e "osrelease=3.9" -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" -e "internaldns=internal" config/setup_hosts.yml
 
+echo ""
+echo "Inventory built at workdir/hosts"
+echo ""
 
-#echo ""
-#echo "Building OCP cluster on ${GUID}"
-#echo ""
-#ansible-playbook -i workdir/hosts -f 20 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml
+read j
 
+echo ""
+echo "Building OCP cluster on ${GUID}"
+echo ""
+ansible-playbook -i workdir/hosts -f 20 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml
+
+echo ""
+echo "Built Cluster ${GUID}"
+echo ""
+
+read j
 ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
 
 echo ""

@@ -16,6 +16,7 @@ ansible_ssh_user=ec2-user
 ###########################################################################
 deployment_type=openshift-enterprise
 containerized=false
+openshift_release=3.9
 openshift_disable_check="disk_availability,memory_availability,docker_image_availability"
 
 
@@ -54,8 +55,8 @@ openshift_master_api_port=443
 openshift_master_console_port=443
 
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname=loadbalancer1.65d2.example.opentlc.com
-openshift_master_cluster_public_hostname=loadbalancer1.65d2.example.opentlc.com
+openshift_master_cluster_hostname=loadbalancer1.65d2.internal
+openshift_master_cluster_public_hostname=loadbalancer.65d2.example.opentlc.com
 openshift_master_default_subdomain=apps.65d2.example.opentlc.com
 openshift_master_overwrite_named_certificates=True
 
@@ -80,7 +81,7 @@ os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
 ### OpenShift Authentication Vars
 ###########################################################################
 
-openshift_master_htpasswd_file=/root/htpasswd.openshift
+openshift_master_htpasswd_file=/root/infra-homework/config/htpasswd
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 ###########################################################################

@@ -16,6 +16,7 @@ ansible_ssh_user={{ansible_ssh_user}}
 ###########################################################################
 deployment_type=openshift-enterprise
 containerized=false
+openshift_release={{ osrelease }}
 openshift_disable_check="disk_availability,memory_availability,docker_image_availability"
 
 {% if container_runtime == "cri-o" %}
@@ -92,8 +93,8 @@ openshift_master_api_port={{master_api_port}}
 openshift_master_console_port={{master_api_port}}
 
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname={{master_lb_dns}}
-openshift_master_cluster_public_hostname={{master_public_dns}}
+openshift_master_cluster_hostname={{master_lb_internal}}
+openshift_master_cluster_public_hostname={{master_lb_dns}}
 openshift_master_default_subdomain={{cloudapps_suffix}}
 openshift_master_overwrite_named_certificates={{openshift_master_overwrite_named_certificates}}
 
