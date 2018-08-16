@@ -1,0 +1,20 @@
+---
+
+- name: Setup hosts file for OCP deploy
+  hosts: localhost
+  connection: local
+  become: False
+  gather_facts: False
+  vars_files:
+    - "{{ANSIBLE_REPO_PATH}}/config/env_vars.yml"
+  tags:
+    - generate_hosts_file
+  tasks:
+    - name: generate ansible hosts file
+      template:
+#        src: "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/files/hosts_template.{{ osrelease }}.j2"
+#        dest: "{{ ANSIBLE_REPO_PATH }}/workdir/hosts-{{ env_type }}-{{ guid }}"
+        src: "{{ ANSIBLE_REPO_PATH }}/config/hosts_template.{{ osrelease }}.j2"
+        dest: "{{ ANSIBLE_REPO_PATH }}/workdir/hosts"
+      when:
+        - osrelease is version_compare('3.9', '>=')

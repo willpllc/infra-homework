@@ -1,0 +1,19 @@
+# vim: set ft=ansible:
+---
+
+#
+# Step 000
+#
+
+- import_playbook: "${{ ANSIBLE_REPO_PATH }}/configs/ocp-ha-lab/pre_infra.yml"
+  tags:
+    - step000
+    - pre_infra_tasks
+
+#
+# Step 001
+#
+
+
+
+
