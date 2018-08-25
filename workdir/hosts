@@ -55,9 +55,9 @@ openshift_master_api_port=443
 openshift_master_console_port=443
 
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname=loadbalancer1.f264.internal
-openshift_master_cluster_public_hostname=loadbalancer.f264.example.opentlc.com
-openshift_master_default_subdomain=apps.f264.example.opentlc.com
+openshift_master_cluster_hostname=loadbalancer1.a6cc.internal
+openshift_master_cluster_public_hostname=loadbalancer.a6cc.example.opentlc.com
+openshift_master_default_subdomain=apps.a6cc.example.opentlc.com
 openshift_master_overwrite_named_certificates=True
 
 
@@ -208,6 +208,7 @@ openshift_enable_service_catalog=true
 
 template_service_broker_install=true
 openshift_template_service_broker_namespaces=['openshift']
+template_service_broker_selector={"env":"infra"}
 
 ansible_service_broker_install=true
 ansible_service_broker_local_registry_whitelist=['.*-apb$']
@@ -231,36 +232,36 @@ nodes
 nfs
 #
 [lb]
-loadbalancer1.f264.internal
+loadbalancer1.a6cc.internal
 
 [masters]
-master1.f264.internal
-master2.f264.internal
-master3.f264.internal
+master1.a6cc.internal
+master2.a6cc.internal
+master3.a6cc.internal
 
 [etcd]
-master1.f264.internal
-master2.f264.internal
-master3.f264.internal
+master1.a6cc.internal
+master2.a6cc.internal
+master3.a6cc.internal
 
 [nodes]
 ## These are the masters
-master1.f264.internal openshift_hostname=master1.f264.internal openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': 'f264', 'runtime': 'docker'}"
-master2.f264.internal openshift_hostname=master2.f264.internal openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': 'f264', 'runtime': 'docker'}"
-master3.f264.internal openshift_hostname=master3.f264.internal openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': 'f264', 'runtime': 'docker'}"
+master1.a6cc.internal openshift_hostname=master1.a6cc.internal openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': 'a6cc', 'runtime': 'docker'}"
+master2.a6cc.internal openshift_hostname=master2.a6cc.internal openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': 'a6cc', 'runtime': 'docker'}"
+master3.a6cc.internal openshift_hostname=master3.a6cc.internal openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': 'a6cc', 'runtime': 'docker'}"
 
 ## These are infranodes
-infranode1.f264.internal openshift_hostname=infranode1.f264.internal openshift_node_labels="{'env':'infra', 'logging':'true','openshift_schedulable':'false','cluster': 'f264', 'runtime': 'docker'}"
-infranode2.f264.internal openshift_hostname=infranode2.f264.internal openshift_node_labels="{'env':'infra', 'logging':'true','openshift_schedulable':'false','cluster': 'f264', 'runtime': 'docker'}"
+infranode1.a6cc.internal openshift_hostname=infranode1.a6cc.internal openshift_node_labels="{'env':'infra', 'logging':'true','openshift_schedulable':'false','cluster': 'a6cc', 'runtime': 'docker'}"
+infranode2.a6cc.internal openshift_hostname=infranode2.a6cc.internal openshift_node_labels="{'env':'infra', 'logging':'true','openshift_schedulable':'false','cluster': 'a6cc', 'runtime': 'docker'}"
 
 ## These are regular nodes
-node1.f264.internal openshift_hostname=node1.f264.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'f264', 'runtime': 'docker'}"
-node2.f264.internal openshift_hostname=node2.f264.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'f264', 'runtime': 'docker'}"
-node3.f264.internal openshift_hostname=node3.f264.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'f264', 'runtime': 'docker'}"
-node4.f264.internal openshift_hostname=node4.f264.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'f264', 'runtime': 'docker'}"
+node1.a6cc.internal openshift_hostname=node1.a6cc.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'a6cc', 'runtime': 'docker'}"
+node2.a6cc.internal openshift_hostname=node2.a6cc.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'a6cc', 'runtime': 'docker'}"
+node3.a6cc.internal openshift_hostname=node3.a6cc.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'a6cc', 'runtime': 'docker'}"
+node4.a6cc.internal openshift_hostname=node4.a6cc.internal openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': 'a6cc', 'runtime': 'docker'}"
 
 
 
 [nfs]
-support1.f264.internal openshift_hostname=support1.f264.internal
+support1.a6cc.internal openshift_hostname=support1.a6cc.internal
 
