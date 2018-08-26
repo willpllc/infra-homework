@@ -1,0 +1,128 @@
+---
+
+- name: Create projects
+  hosts: localhost
+  gather_facts: False
+  become: yes
+  vars_files:
+    - "{{ ANSIBLE_REPO_PATH }}/config/cicd_env_var.yml"
+  tasks:
+    - name: Check for project {{ cicd_project }}
+      shell: "oc get project {{ cicd_project }}"
+      warn: no
+      register: cicd_proj_chk
+      ignore_errors: yes
+
+    - name: Create project {{ cicd_project }}
+      shell: "oc new-project {{ cicd_project }} --display-name='CI/CD' >/dev/null 2>&1"
+      warn: no
+      ignore_errors: yes
+      check_mode: no
+      when: cicd_proj_chk.rc != 0
+
+    - name: Check for Company projects
+      shell: "oc get project {{ item.proj }}"
+      warn: no
+#      with_dict: "{{ company_projs }}"
+      register: proj_chk
+      ignore_errors: yes
+      with_items: "{{ company_projs }}"
+#      with_subelements:
+#        - "{{ company_projs }}"
+#        - display
+
+#    - debug: var=proj_chk
+
+    - name: Create Company projects
+      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+#      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
+      warn: no
+      ignore_errors: yes
+      check_mode: no
+      when: "{{ item.rc }} != 0"
+      with_items: "{{ proj_chk.results }}"
+
+    - name: Pause for projects to be instantiated
+      shell: "sleep 5"
+      changed_when: false
+
+    - name: Check for Users
+      shell: "oc get user {{ item.key }} >/dev/null 2>&1"
+      warn: no
+      with_dict: "{{ company_users }}"
+      register: user_chk
+      ignore_errors: yes
+    - name: Create Users
+      shell: "oc create user {{ item.item.key }} >/dev/null 2>&1"
+      warn: no
+      ignore_errors: yes
+      check_mode: no
+      when: "{{ item.rc }} != 0"
+      with_items: "{{ user_chk.results }}"
+
+    - name: Check for Identities
+      shell: "oc get identity htpasswd_auth:{{ item.key }} >/dev/null 2>&1"
+      warn: no
+      with_dict: "{{ company_users }}"
+      register: id_chk
+      ignore_errors: yes
+    - name: Create Identies
+      shell: "oc create identity htpasswd_auth:{{ item.item.key }} >/dev/null 2>&1"
+      warn: no
+      ignore_errors: yes
+      check_mode: no
+      when: "{{ item.rc }} != 0"
+      with_items: "{{ id_chk.results }}"
+
+    - name: Create Identity mappings
+      shell: "oc create useridentitymapping htpasswd_auth:{{ item.key }} {{ item.key }} >/dev/null 2>&1"
+      warn: no
+      with_dict: "{{ company_users }}"
+      register: user_chk
+      ignore_errors: yes
+      check_mode: no
+
+    - name: Add admin for cicd
+      shell: "oc adm policy add-role-to-user admin steve -n cicd"
+
+    - name: Add admin for projects
+      shell: "oc adm policy add-role-to-user admin {{ item.1.admin }} -n {{ item.0.proj }}"
+#      debug: msg="0 is {{ item.0.proj }} admin is {{ item.1.admin }}"
+      with_subelements:
+        - "{{ company_projs }}"
+        - admins
+
+
+
+#    - name: Add roles
+#      shell: "oc adm policy add-role-to-user admin steve -n cicd"
+#      shell: "oc adm policy add-role-to-user admin steve -n {{ company1 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin steve -n {{ company1 }}-stage"
+#      shell: "oc adm policy add-role-to-user admin steve -n {{ company2 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin steve -n {{ company2 }}-stage"
+#      shell: "oc adm policy add-role-to-user admin steve -n {{ company3 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin steve -n {{ company3 }}-stage"
+#      shell: "oc adm policy add-role-to-user admin amy -n {{ company1 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin amy -n {{ company1 }}-stage"
+#      shell: "oc adm policy add-role-to-user admin andrew -n {{ company1 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin andrew -n {{ company1 }}-stage"
+#      shell: "oc adm policy add-role-to-user admin brian -n {{ company2 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin brian -n {{ company2 }}-stage"
+#      shell: "oc adm policy add-role-to-user admin betty -n {{ company2 }}-dev"
+#      shell: "oc adm policy add-role-to-user admin betty -n {{ company2 }}-stage"
+#    - name: Join projects
+#      shell: "oc adm pod-network join-projects --to=cicd {{ company1 }}-dev {{ company1 }}-stage {{ company2 }}-dev {{ company2 }}-stage {{ company2 }}-dev {{ company2 }}-stage"
+
+
+#- name: create Jenkins
+#  hosts: localhost
+#  gather_facts: False
+#  become: yes
+#  ignore_errors: yes
+#  vars_files:
+#    - "{{ ANSIBLE_REPO_PATH }}/config/cicd_env_var.yml"
+#  tasks:
+#    - name: Check for project {{ cicd_project }}
+#      shell: "oc get project {{ cicd_project }}"
+
+
