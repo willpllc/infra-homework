@@ -9,20 +9,17 @@
   tasks:
     - name: Check for project {{ cicd_project }}
       shell: "oc get project {{ cicd_project }}"
-      warn: no
       register: cicd_proj_chk
       ignore_errors: yes
 
     - name: Create project {{ cicd_project }}
       shell: "oc new-project {{ cicd_project }} --display-name='CI/CD' >/dev/null 2>&1"
-      warn: no
       ignore_errors: yes
       check_mode: no
       when: cicd_proj_chk.rc != 0
 
     - name: Check for Company projects
       shell: "oc get project {{ item.proj }}"
-      warn: no
 #      with_dict: "{{ company_projs }}"
       register: proj_chk
       ignore_errors: yes
@@ -36,7 +33,6 @@
     - name: Create Company projects
       shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
-      warn: no
       ignore_errors: yes
       check_mode: no
       when: "{{ item.rc }} != 0"
@@ -48,13 +44,11 @@
 
     - name: Check for Users
       shell: "oc get user {{ item.key }} >/dev/null 2>&1"
-      warn: no
       with_dict: "{{ company_users }}"
       register: user_chk
       ignore_errors: yes
     - name: Create Users
       shell: "oc create user {{ item.item.key }} >/dev/null 2>&1"
-      warn: no
       ignore_errors: yes
       check_mode: no
       when: "{{ item.rc }} != 0"
@@ -62,13 +56,11 @@
 
     - name: Check for Identities
       shell: "oc get identity htpasswd_auth:{{ item.key }} >/dev/null 2>&1"
-      warn: no
       with_dict: "{{ company_users }}"
       register: id_chk
       ignore_errors: yes
     - name: Create Identies
       shell: "oc create identity htpasswd_auth:{{ item.item.key }} >/dev/null 2>&1"
-      warn: no
       ignore_errors: yes
       check_mode: no
       when: "{{ item.rc }} != 0"
@@ -76,7 +68,6 @@
 
     - name: Create Identity mappings
       shell: "oc create useridentitymapping htpasswd_auth:{{ item.key }} {{ item.key }} >/dev/null 2>&1"
-      warn: no
       with_dict: "{{ company_users }}"
       register: out
       ignore_errors: yes
@@ -93,15 +84,13 @@
         - admins
 
     - name: Add jenkins service account to projects
-      shell: "oc policy add-role-to-user edit system:serviceaccount:{{ cicd_project }}:jenkins-n {{ item.proj }} >/dev/null 2>&1"
-      warn: no
+      shell: "oc policy add-role-to-user edit system:serviceaccount:{{ cicd_project }}:jenkins {{ item.proj }} >/dev/null 2>&1"
       ignore_errors: yes
       check_mode: no
       with_items: "{{ company_projs }}"
 
     - name: Join projects
       shell: "oc adm pod-network join-projects --to={{ cicd_project }} {{ item.proj }} >/dev/null 2>&1"
-      warn: no
       ignore_errors: yes
       check_mode: no
       with_items: "{{ company_projs }}"
@@ -112,7 +101,6 @@
 
     - name: Check to see if Jenkins is already setup
       shell: "oc get svc/jenkins -n {{ cicd_project }}"
-      warn: no
       register: jenkins_chk
       ignore_errors: yes
 
@@ -122,13 +110,27 @@
       check_mode: no
       when: jenkins_chk.rc != 0
 
-    - name: Pause for Jenkins to start
+    - name: Pause for Jenkins to start - 2 mins
       shell: "sleep 120"
+      check_mode: no
       changed_when: false
+      when: jenkins_chk.rc != 0
 
     - name: Create pipeline for common
-      shell: "oc new-app -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false -n {{ cicd_project }"
+      shell: "oc new-app -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false -n {{ cicd_project }}"
       check_mode: no
+      when: jenkins_chk.rc != 0
+
+    - name: Pause for Pipeline to be setup - 5 mins
+      shell: "sleep 300"
+      check_mode: no
+      changed_when: false
+      when: jenkins_chk.rc != 0
+
+    - name: Start pipeline build
+      shell: "oc start-build tasks-pipeline -n cicd"
+      check_mode: no
+      when: jenkins_chk.rc != 0
 
 
 #- name: create Jenkins
