@@ -58,7 +58,7 @@ echo ""
 echo "Inventory built at workdir/hosts"
 echo ""
 
-read j
+#read j
 
 echo ""
 echo "Building OCP cluster on ${GUID}"
@@ -69,12 +69,28 @@ echo ""
 echo "Built Cluster ${GUID}"
 echo ""
 
-read j
+#read j
+
 ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
 
 echo ""
 echo "Setup storage for OCP cluster on ${GUID}"
 echo ""
 ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" config/setup_storage.yml
+
+echo ""
+echo "Setup storage Complete"
+echo ""
+
+#read j
+
+echo ""
+echo "Setup CI/CD"
+echo ""
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" config/setup_cicd.yml
+
+echo ""
+echo "CICD Setup complete"
+echo ""
 
 
