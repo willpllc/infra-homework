@@ -10,6 +10,8 @@
     - name: Check for project {{ cicd_project }}
       shell: "oc get project {{ cicd_project }}"
       register: cicd_proj_chk
+      failed_when: false
+      changed_when: false
       ignore_errors: yes
 
     - name: Create project {{ cicd_project }}
@@ -23,6 +25,8 @@
 #      with_dict: "{{ company_projs }}"
       register: proj_chk
       ignore_errors: yes
+      failed_when: false
+      changed_when: false
       with_items: "{{ company_projs }}"
 #      with_subelements:
 #        - "{{ company_projs }}"
@@ -46,6 +50,8 @@
       shell: "oc get user {{ item.key }} >/dev/null 2>&1"
       with_dict: "{{ company_users }}"
       register: user_chk
+      failed_when: false
+      changed_when: false
       ignore_errors: yes
     - name: Create Users
       shell: "oc create user {{ item.item.key }} >/dev/null 2>&1"
@@ -58,6 +64,8 @@
       shell: "oc get identity htpasswd_auth:{{ item.key }} >/dev/null 2>&1"
       with_dict: "{{ company_users }}"
       register: id_chk
+      failed_when: false
+      changed_when: false
       ignore_errors: yes
     - name: Create Identies
       shell: "oc create identity htpasswd_auth:{{ item.item.key }} >/dev/null 2>&1"
@@ -71,6 +79,7 @@
       with_dict: "{{ company_users }}"
       register: out
       ignore_errors: yes
+      failed_when: false
       check_mode: no
 
     - name: Add admin for cicd
@@ -84,7 +93,7 @@
         - admins
 
     - name: Add jenkins service account to projects
-      shell: "oc policy add-role-to-user edit system:serviceaccount:{{ cicd_project }}:jenkins {{ item.proj }} >/dev/null 2>&1"
+      shell: "oc policy add-role-to-user edit system:serviceaccount:{{ cicd_project }}:jenkins -n {{ item.proj }} >/dev/null 2>&1"
       ignore_errors: yes
       check_mode: no
       with_items: "{{ company_projs }}"
@@ -102,10 +111,16 @@
     - name: Check to see if Jenkins is already setup
       shell: "oc get svc/jenkins -n {{ cicd_project }}"
       register: jenkins_chk
+      failed_when: false
+      changed_when: false
       ignore_errors: yes
 
     - name: Setup Persistent Jenkins
       shell: "oc new-app jenkins-persistent --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n {{ cicd_project }} >/dev/null 2>&1"
+      check_mode: no
+      when: jenkins_chk.rc != 0
+
+    - name: Increase CPU resources for Jenkins
       shell: "oc set resources dc jenkins --limits=cpu=2 --requests=cpu=1 -n {{ cicd_project }} >/dev/null 2>&1"
       check_mode: no
       when: jenkins_chk.rc != 0
@@ -116,21 +131,35 @@
       changed_when: false
       when: jenkins_chk.rc != 0
 
+
+#    - name: Check if CI/CD pipeline template has been uploaded
+#      shell: "oc get template cicd-pipeline -n {{ cicd_project }}"
+#      register: template_chk
+#      failed_when: false
+#      changed_when: false
+#      ignore_errors: yes
+#
+#    - name: Upload CI/CD pipeline template
+#      shell: "oc create -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml -n {{ cicd_project }} >/dev/null 2>&1"
+#      check_mode: no
+#      when: template_chk.rc != 0
+
     - name: Create pipeline for common
-      shell: "oc new-app -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false -n {{ cicd_project }}"
+      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
+#      shell: "oc new-app -f cicd-pipeline --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false -n {{ cicd_project }}"
       check_mode: no
-      when: jenkins_chk.rc != 0
+#      when: jenkins_chk.rc != 0
 
     - name: Pause for Pipeline to be setup - 5 mins
       shell: "sleep 300"
       check_mode: no
       changed_when: false
-      when: jenkins_chk.rc != 0
+#      when: jenkins_chk.rc != 0
 
     - name: Start pipeline build
       shell: "oc start-build tasks-pipeline -n cicd"
       check_mode: no
-      when: jenkins_chk.rc != 0
+#      when: jenkins_chk.rc != 0
 
 
 #- name: create Jenkins

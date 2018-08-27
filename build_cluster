@@ -87,7 +87,7 @@ echo ""
 echo ""
 echo "Setup CI/CD"
 echo ""
-ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" config/setup_cicd.yml
+#ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" -e "guid=${GUID}" config/setup_cicd.yml
 
 echo ""
 echo "CICD Setup complete"

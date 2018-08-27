@@ -7,7 +7,7 @@ metadata:
   annotations:
     iconClass: icon-jenkins
     tags: instant-app,jenkins,gogs,nexus,cicd
-  name: cicd
+  name: cicd-pipeline
 message: "Use the following credentials for login:\nJenkins: use your OpenShift credentials\nNexus: admin/admin123\nSonarQube: admin/admin\nGogs Git Server: gogs/gogs"
 parameters:
 - displayName: DEV project name
@@ -183,13 +183,6 @@ objects:
                   }
                 }
               }
-#              stage('Promote to STAGE?') {
-#                steps {
-#                  timeout(time:15, unit:'MINUTES') {
-#                      input message: "Promote to STAGE?", ok: "Promote"
-#                  }
-#                }
-#              }
               stage('Deploy STAGE') {
                 steps {
                   script {
@@ -198,7 +191,6 @@ objects:
                   }
                   script {
                     openshift.withCluster() {
-                      #
                       openshift.tag("${env.DEV_PROJECT}/tasks:latest", "${env.STAGE_PROJECT}/tasks:${version}")
                       openshift.withProject(env.STAGE_PROJECT) {
                         if (openshift.selector('dc', 'tasks').exists()) {
