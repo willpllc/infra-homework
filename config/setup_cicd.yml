@@ -35,7 +35,8 @@
 #    - debug: var=proj_chk
 
     - name: Create Company projects
-      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+#      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
       ignore_errors: yes
       check_mode: no

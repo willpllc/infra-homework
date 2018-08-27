@@ -8,32 +8,38 @@ company_projs:
       - admin: amy
       - admin: andrew
       - admin: steve
+    client: alpha
   - proj: alpha-stage
     display: "Alpha Corp - Stage"
     admins:
       - admin: amy
       - admin: andrew
       - admin: steve
+    client: alpha
   - proj: beta-dev
     display: "Beta Corp - Dev"
     admins:
       - admin: brian
       - admin: betty
       - admin: steve
+    client: beta
   - proj: beta-stage
     display: "Beta Corp - Stage"
     admins:
       - admin: brian
       - admin: betty
       - admin: steve
+    client: beta
   - proj: common-dev
     display: "Common - Dev"
     admins:
       - admin: steve
+    client: common
   - proj: common-stage
     display: "Common - Stage"
     admins:
       - admin: steve
+    client: common
 company_users:
   amy:
   andrew:
