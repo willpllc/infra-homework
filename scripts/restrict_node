@@ -1,0 +1,18 @@
+#!/bin/perl
+
+use strict;
+
+
+if ( scalar(@ARGV) == 2 ) {
+
+  my $client = $ARGV[0];
+  my $node = $ARGV[1];
+
+#  print("Client is $client and node is $node\n");
+
+  my $to_run = "oc label node ".$node." client=".$client;
+#  print("To run $to_run\n");
+  `$to_run`;
+
+} # end if
+

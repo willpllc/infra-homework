@@ -5,110 +5,8 @@
   gather_facts: False
   become: yes
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/config/cicd_env_var.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/clients_env_var.yml"
   tasks:
-    - name: Check for project {{ cicd_project }}
-      shell: "oc get project {{ cicd_project }}"
-      register: cicd_proj_chk
-      failed_when: false
-      changed_when: false
-      ignore_errors: yes
-
-    - name: Create project {{ cicd_project }}
-      shell: "oc new-project {{ cicd_project }} --display-name='CI/CD' >/dev/null 2>&1"
-      ignore_errors: yes
-      check_mode: no
-      when: cicd_proj_chk.rc != 0
-
-    - name: Check for Company projects
-      shell: "oc get project {{ item.proj }}"
-#      with_dict: "{{ company_projs }}"
-      register: proj_chk
-      ignore_errors: yes
-      failed_when: false
-      changed_when: false
-      with_items: "{{ company_projs }}"
-#      with_subelements:
-#        - "{{ company_projs }}"
-#        - display
-
-#    - debug: var=proj_chk
-
-    - name: Create Company projects
-      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
-#      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
-#      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
-      ignore_errors: yes
-      check_mode: no
-      when: "{{ item.rc }} != 0"
-      with_items: "{{ proj_chk.results }}"
-
-    - name: Pause for projects to be instantiated
-      shell: "sleep 5"
-      changed_when: false
-
-    - name: Check for Users
-      shell: "oc get user {{ item.key }} >/dev/null 2>&1"
-      with_dict: "{{ company_users }}"
-      register: user_chk
-      failed_when: false
-      changed_when: false
-      ignore_errors: yes
-    - name: Create Users
-      shell: "oc create user {{ item.item.key }} >/dev/null 2>&1"
-      ignore_errors: yes
-      check_mode: no
-      when: "{{ item.rc }} != 0"
-      with_items: "{{ user_chk.results }}"
-
-    - name: Check for Identities
-      shell: "oc get identity htpasswd_auth:{{ item.key }} >/dev/null 2>&1"
-      with_dict: "{{ company_users }}"
-      register: id_chk
-      failed_when: false
-      changed_when: false
-      ignore_errors: yes
-    - name: Create Identies
-      shell: "oc create identity htpasswd_auth:{{ item.item.key }} >/dev/null 2>&1"
-      ignore_errors: yes
-      check_mode: no
-      when: "{{ item.rc }} != 0"
-      with_items: "{{ id_chk.results }}"
-
-    - name: Create Identity mappings
-      shell: "oc create useridentitymapping htpasswd_auth:{{ item.key }} {{ item.key }} >/dev/null 2>&1"
-      with_dict: "{{ company_users }}"
-      register: out
-      ignore_errors: yes
-      failed_when: false
-      check_mode: no
-
-    - name: Add admin for cicd
-      shell: "oc adm policy add-role-to-user admin steve -n {{ cicd_project }}"
-
-    - name: Add admin for projects
-      shell: "oc adm policy add-role-to-user admin {{ item.1.admin }} -n {{ item.0.proj }}"
-#      debug: msg="0 is {{ item.0.proj }} admin is {{ item.1.admin }}"
-      with_subelements:
-        - "{{ company_projs }}"
-        - admins
-
-    - name: Add jenkins service account to projects
-      shell: "oc policy add-role-to-user edit system:serviceaccount:{{ cicd_project }}:jenkins -n {{ item.proj }} >/dev/null 2>&1"
-      ignore_errors: yes
-      check_mode: no
-      with_items: "{{ company_projs }}"
-
-    - name: Join projects
-      shell: "oc adm pod-network join-projects --to={{ cicd_project }} {{ item.proj }} >/dev/null 2>&1"
-      ignore_errors: yes
-      check_mode: no
-      with_items: "{{ company_projs }}"
-
-    - name: Pause for things to complete
-      shell: "sleep 5"
-      changed_when: false
-
     - name: Check to see if Jenkins is already setup
       shell: "oc get svc/jenkins -n {{ cicd_project }}"
       register: jenkins_chk
@@ -161,17 +59,5 @@
       shell: "oc start-build tasks-pipeline -n cicd"
       check_mode: no
 #      when: jenkins_chk.rc != 0
-
-
-#- name: create Jenkins
-#  hosts: localhost
-#  gather_facts: False
-#  become: yes
-#  ignore_errors: yes
-#  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/config/cicd_env_var.yml"
-#  tasks:
-#    - name: Check for project {{ cicd_project }}
-#      shell: "oc get project {{ cicd_project }}"
 
 
