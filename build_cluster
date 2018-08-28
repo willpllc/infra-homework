@@ -74,6 +74,17 @@ echo ""
 
 #read j
 
+echo ""
+echo "Post-software OCP cluster config on ${GUID}"
+echo ""
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/config/post_software.yml
+
+echo ""
+echo "Completed Post-software OCP cluster config on ${GUID}"
+echo ""
+
+#read j
+
 ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
 
 echo ""

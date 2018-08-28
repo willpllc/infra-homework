@@ -41,12 +41,7 @@ install_openwhisk: false
 install_idm: false
 htpasswd_file: "{{ANSIBLE_REPO_PATH}}/config/htpasswd"
 cicd_project: 'cicd'
-company1: 'alpha'
-company1_name: 'Alpha Corp'
-company2: 'beta'
-company2_name: 'Beta Corp'
-company3: 'common'
-company3_name: 'Common'
+project_request_message: "Speak to OCP cluster admin to create a project"
 
 ################################################################################
 #### GENERIC EXAMPLE
