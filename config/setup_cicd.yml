@@ -1,6 +1,6 @@
 ---
 
-- name: Create projects
+- name: Create CICD
   hosts: localhost
   gather_facts: False
   become: yes
@@ -44,7 +44,8 @@
 #      when: template_chk.rc != 0
 
     - name: Create pipeline for common
-      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
+      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param PROD_PROJECT=common-prod --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
+#      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
 #      shell: "oc new-app -f cicd-pipeline --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false -n {{ cicd_project }}"
       check_mode: no
 #      when: jenkins_chk.rc != 0
@@ -55,7 +56,7 @@
       changed_when: false
 #      when: jenkins_chk.rc != 0
 
-    - name: Start pipeline build
+    - name: Start tasks-pipeline build
       shell: "oc start-build tasks-pipeline -n cicd"
       check_mode: no
 #      when: jenkins_chk.rc != 0

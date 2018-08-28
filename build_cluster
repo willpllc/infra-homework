@@ -48,6 +48,9 @@ else
 
 fi
 
+if [ ! -d "workdir" ]; then
+  mkdir workdir
+fi
 
 echo ""
 echo "Building OCP inventory for ${GUID}"
@@ -87,7 +90,7 @@ echo ""
 echo ""
 echo "Setup Accounts and Projects"
 echo ""
-#ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_clients.yml
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_clients.yml
 
 echo ""
 echo "Account/Projects setup complete"

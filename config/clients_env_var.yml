@@ -40,6 +40,11 @@ company_projs:
     admins:
       - admin: steve
     client: common
+  - proj: common-prod
+    display: "Common - Prod"
+    admins:
+      - admin: steve
+    client: common
 company_users:
   amy:
   andrew:

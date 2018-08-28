@@ -15,7 +15,7 @@
       changed_when: false
 
     - name: Restrict nodes
-      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/restrict_node {{ item.0 }} {{ item.1 }}"
+      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/label_node {{ item.0 }} {{ item.1 }}"
       when: item.0 != ""
       with_together:
         - "{{ company_projs | map(attribute='client') | list | unique }}"
@@ -60,6 +60,12 @@
     - name: Pause for projects to be instantiated
       shell: "sleep 5"
       changed_when: false
+
+    - name: Label Company namespaces
+      shell: "oc label namespace {{ item.item.proj }} client={{ item.item.client }}"
+      ignore_errors: yes
+      check_mode: no
+      with_items: "{{ proj_chk.results }}"
 
     - name: Check for Users
       shell: "oc get user {{ item.key }} >/dev/null 2>&1"
