@@ -16,6 +16,7 @@ ansible_ssh_user={{ansible_ssh_user}}
 ###########################################################################
 deployment_type=openshift-enterprise
 containerized=false
+openshift_release={{ osrelease }}
 openshift_disable_check="disk_availability,memory_availability,docker_image_availability"
 
 {% if container_runtime == "cri-o" %}
@@ -26,7 +27,7 @@ openshift_crio_docker_gc_node_selector={'runtime': 'cri-o'}
 {% endif %}
 
 # default project node selector
-osm_default_node_selector='env=users'
+osm_default_node_selector='env=app,client=common'
 openshift_hosted_infra_selector="env=infra"
 
 # Configure node kubelet arguments. pods-per-core is valid in OpenShift Origin 1.3 or OpenShift Container Platform 3.3 and later.
@@ -38,6 +39,7 @@ logrotate_scripts=[{"name": "syslog", "path": "/var/log/cron\n/var/log/maillog\n
 
 # Necessary for 3.9.30+
 oreg_url=registry.access.redhat.com/openshift3/ose-${component}:${version}
+oreg_url_node=registry.access.redhat.com/openshift3/ose-${component}:${version}
 openshift_examples_modify_imagestreams=true
 
 {% if install_glusterfs|bool %}
@@ -92,10 +94,13 @@ openshift_master_api_port={{master_api_port}}
 openshift_master_console_port={{master_api_port}}
 
 openshift_master_cluster_method=native
-openshift_master_cluster_hostname={{master_lb_dns}}
+openshift_master_cluster_hostname={{master_lb_internal}}
 openshift_master_cluster_public_hostname={{master_lb_dns}}
 openshift_master_default_subdomain={{cloudapps_suffix}}
 openshift_master_overwrite_named_certificates={{openshift_master_overwrite_named_certificates}}
+
+#openshift_master_ca_certificate={'certfile': '/root/intermediate_ca.crt', 'keyfile': '/root/intermediate_ca.key'}
+openshift_master_overwrite_named_certificates=True
 
 {% if install_lets_encrypt_certificates|bool %}
 openshift_master_named_certificates={{lets_encrypt_openshift_master_named_certificates|to_json}}
@@ -124,7 +129,7 @@ openshift_master_admission_plugin_config={{admission_plugin_config|to_json}}
 ### OpenShift Authentication Vars
 ###########################################################################
 
-openshift_master_htpasswd_file=/root/htpasswd.openshift
+openshift_master_htpasswd_file={{htpasswd_file}}
 openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
 
 ###########################################################################
@@ -244,11 +249,11 @@ openshift_logging_es_pvc_storage_class_name=''
 {% if install_glusterfs|bool %}
 openshift_logging_es_pvc_dynamic=true
 openshift_logging_es_pvc_size=30Gi
-openshift_logging_es_cluster_size=1
+#openshift_logging_es_cluster_size=1
 openshift_logging_es_pvc_storage_class_name='glusterfs-storage-block'
 {% endif %}
 
-openshift_logging_es_cluster_size=1
+openshift_logging_es_cluster_size=2
 openshift_logging_es_nodeselector={"env":"infra"}
 openshift_logging_kibana_nodeselector={"env":"infra"}
 openshift_logging_curator_nodeselector={"env":"infra"}
@@ -296,9 +301,11 @@ openshift_enable_service_catalog=true
 
 template_service_broker_install=true
 openshift_template_service_broker_namespaces=['openshift']
+openshift_template_service_broker_selector={"env":"infra"}
 
 ansible_service_broker_install=true
 ansible_service_broker_local_registry_whitelist=['.*-apb$']
+#ansible_service_broker_selector={"env":"infra"}
 
 {% if install_glusterfs|bool %}
 openshift_hosted_etcd_storage_kind=dynamic
@@ -331,34 +338,60 @@ glusterfs
 #{% endif %}
 
 [lb]
-loadbalancer1.{{guid}}.internal
+{% for host in groups['lb']|sort %}
+{{ host }}
+{% endfor %}
 
 [masters]
-master1.{{guid}}.internal
-master2.{{guid}}.internal
-master3.{{guid}}.internal
+{% for host in groups['masters']|sort %}
+{{ host }}
+{% endfor %}
 
 [etcd]
-master1.{{guid}}.internal
-master2.{{guid}}.internal
-master3.{{guid}}.internal
+{% for host in groups['masters']|sort %}
+{{ host }}
+{% endfor %}
 
 [nodes]
 ## These are the masters
-master1.{{guid}}.internal openshift_hostname=master1.{{guid}}.internal openshift_node_labels="{'env':'master', 'cluster': '{{guid}}'}"
-master2.{{guid}}.internal openshift_hostname=master1.{{guid}}.internal openshift_node_labels="{'env':'master', 'cluster': '{{guid}}'}"
-master3.{{guid}}.internal openshift_hostname=master1.{{guid}}.internal openshift_node_labels="{'env':'master', 'cluster': '{{guid}}'}"
+{% for host in groups['masters']|sort %}
+{{ host }} openshift_hostname={{ host }} openshift_node_labels="{'env':'master', 'logging':'true','openshift_schedulable':'false','cluster': '{{guid}}', 'runtime': '{{container_runtime}}'}"
+{% endfor %}
 
 ## These are infranodes
-infranode1.{{guid}}.internal openshift_hostname=infranode1.{{guid}}.internal openshift_node_labels="{'env':'infra', 'cluster': '{{guid}}'}"
-infranode2.{{guid}}.internal openshift_hostname=infranode2.{{guid}}.internal openshift_node_labels="{'env':'infra', 'cluster': '{{guid}}'}"
+{% for host in groups['nodes'] | select('match', '^infranode') |sort %}
+{{ host }} openshift_hostname={{ host }} openshift_node_labels="{'env':'infra', 'logging':'true','openshift_schedulable':'false','cluster': '{{guid}}', 'runtime': '{{container_runtime}}'}"
+{% endfor %}
 
 ## These are regular nodes
-node1.{{guid}}.internal openshift_hostname=node1.{{guid}}.internal openshift_node_labels="{'env':'app', 'cluster': '{{guid}}'}"
-node2.{{guid}}.internal openshift_hostname=node1.{{guid}}.internal openshift_node_labels="{'env':'app', 'cluster': '{{guid}}'}"
-node3.{{guid}}.internal openshift_hostname=node1.{{guid}}.internal openshift_node_labels="{'env':'app', 'cluster': '{{guid}}'}"
-node4.{{guid}}.internal openshift_hostname=node1.{{guid}}.internal openshift_node_labels="{'env':'app', 'cluster': '{{guid}}'}"
+{% for host in groups['nodes'] | select('match', '^node') |sort
+  if host not in groups['newnodes']|d([])
+  and host not in groups['glusterfs']|d([])
+  and host not in groups['masters']|d([])
+  %}
+{{ host }} openshift_hostname={{ host }} openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': '{{guid}}', 'runtime': '{{container_runtime}}'}"
+{% endfor %}
 
+{% if groups['glusterfs']|d([])|length > 0 %}
+## These are glusterfs nodes
+{% for host in groups['glusterfs']|sort %}
+{{ host }} openshift_hostname={{ host }} openshift_node_labels="{'env':'glusterfs', 'logging':'true','openshift_schedulable':'true','cluster': '{{guid}}', 'runtime': '{{container_runtime}}'}"
+{% endfor %}
+{% endif %}
+
+{% if groups['newnodes']|d([])|length > 0 %}
+# scaleup performed, leave an empty group, see:
+# https://docs.openshift.com/container-platform/3.7/install_config/adding_hosts_to_existing_cluster.html
+[new_nodes]
+{% for host in groups['newnodes']|sort %}
+{{ host }} openshift_hostname={{ host }} openshift_node_labels="{'env':'app', 'logging':'true','openshift_schedulable':'true','cluster': '{{guid}}', 'runtime': '{{container_runtime}}'}"
+{% endfor %}
+{% endif %}
+
+{% if install_nfs|bool %}
 [nfs]
-support1.{{guid}}.internal openshift_hostname=support1.{{guid}}.internal
+{% for host in [groups['nfs']|sort|first] %}
+{{ host }} openshift_hostname={{ host }}
+{% endfor %}
+{% endif %}
 

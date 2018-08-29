@@ -320,6 +320,58 @@ openshift_hosted_etcd_storage_access_modes=['ReadWriteOnce']
 openshift_hosted_etcd_storage_volume_size=10G
 
 ###########################################################################
+### Default project template
+###########################################################################
+openshift_project_request_template_edits:
+  - key: objects
+    action: append
+    value:
+      apiVersion: v1
+      kind: ResourceQuota
+      metadata:
+        name: quota
+      spec:
+        hard:
+          requests.cpu: "24"
+          requests.memory: 30Gi
+          limits.cpu: "40"
+          limits.memory: 60Gi
+        scopes:
+        - NotTerminating
+  - key: objects
+    action: append
+    value:
+      apiVersion: v1
+      kind: LimitRange
+      metadata:
+        name: core-resource-limits
+      spec:
+        limits:
+        - type: Pod
+          max:
+            cpu: "6"
+            memory: 8Gi
+          min:
+            cpu: 50m
+            memory: 6Mi
+        - type: Container
+          default:
+            cpu: 400m
+            memory: 400Mi
+          defaultRequest:
+            cpu: 100m
+            memory: 200Mi
+          max:
+            cpu: "4"
+            memory: 4Gi
+          min:
+            cpu: 20m
+            memory: 4Mi
+openshift_project_request_template_namespace: default
+openshift_project_request_template_name: project-request
+openshift_project_request_template_manage: True
+
+###########################################################################
 ### OpenShift Hosts
 ###########################################################################
 [OSEv3:children]
