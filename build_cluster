@@ -77,7 +77,7 @@ echo ""
 echo ""
 echo "Post-software OCP cluster config on ${GUID}"
 echo ""
-ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/config/post_software.yml
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/post_software.yml
 
 echo ""
 echo "Completed Post-software OCP cluster config on ${GUID}"

@@ -14,25 +14,25 @@
 #      failed_when: false
       changed_when: false
 
-    - name: Restrict nodes
+    - name: Restrict nodes by node selector on client label
       shell: "{{ ANSIBLE_REPO_PATH }}/scripts/label_node {{ item.0 }} {{ item.1 }}"
       when: item.0 != ""
       with_together:
         - "{{ company_projs | map(attribute='client') | list | unique }}"
         - "{{ app_node_list.stdout_lines }}"
 
-    - name: Check for project {{ cicd_project }}
-      shell: "oc get project {{ cicd_project }}"
-      register: cicd_proj_chk
-      failed_when: false
-      changed_when: false
-      ignore_errors: yes
-
-    - name: Create project {{ cicd_project }}
-      shell: "oc new-project {{ cicd_project }} --display-name='CI/CD' >/dev/null 2>&1"
-      ignore_errors: yes
-      check_mode: no
-      when: cicd_proj_chk.rc != 0
+#    - name: Check for project {{ cicd_project }}
+#      shell: "oc get project {{ cicd_project }}"
+#      register: cicd_proj_chk
+#      failed_when: false
+#      changed_when: false
+#      ignore_errors: yes
+#
+#    - name: Create project {{ cicd_project }}
+#      shell: "oc new-project {{ cicd_project }} --display-name='CI/CD' >/dev/null 2>&1"
+#      ignore_errors: yes
+#      check_mode: no
+#      when: cicd_proj_chk.rc != 0
 
     - name: Check for Company projects
       shell: "oc get project {{ item.proj }}"

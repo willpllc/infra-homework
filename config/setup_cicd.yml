@@ -50,8 +50,8 @@
       check_mode: no
 #      when: jenkins_chk.rc != 0
 
-    - name: Pause for Pipeline to be setup - 5 mins
-      shell: "sleep 300"
+    - name: Pause for Pipeline to be setup - 4 mins
+      shell: "sleep 240"
       check_mode: no
       changed_when: false
 #      when: jenkins_chk.rc != 0

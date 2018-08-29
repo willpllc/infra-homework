@@ -2,6 +2,11 @@
 
 cicd_project: 'cicd'
 company_projs:
+  - proj: cicd
+    display: "CI/CD"
+    admins:
+      - admin: steve
+    client: build
   - proj: alpha-dev
     display: "Alpha Corp - Dev"
     admins:

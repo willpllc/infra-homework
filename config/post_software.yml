@@ -6,7 +6,7 @@
 #  become: yes
 #  gather_facts: False
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #  tags:
 #    - env-specific
 #    - env-specific_infra
@@ -42,7 +42,7 @@
   become: yes
   gather_facts: False
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/env_vars.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
   tags:
     - env-specific
     - env-specific_infra
@@ -95,7 +95,7 @@
   become: yes
   gather_facts: False
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/configs/env_vars.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
   tags: [ env-specific, remove_self_provisioners ]
   tasks:
     - when: remove_self_provisioners|bool
@@ -107,27 +107,27 @@
         command: "oc adm policy remove-cluster-role-from-group self-provisioner system:authenticated system:authenticated:oauth"
         ignore_errors: true
 
-#      - name: create our own OPENTLC-PROJECT-PROVISIONERS
-#        command: "oc adm groups new OPENTLC-PROJECT-PROVISIONERS"
+#      - name: create our own our-proj-prov
+#        command: "oc adm groups new our-proj-prov
 #        ignore_errors: true
 #
-#      - name: allow OPENTLC-PROJECT-PROVISIONERS members to provision their own projects
-#        command: "oc adm policy add-cluster-role-to-group self-provisioner OPENTLC-PROJECT-PROVISIONERS"
+#      - name: allow our-proj-prov members to provision their own projects
+#        command: "oc adm policy add-cluster-role-to-group self-provisioner our-proj-prov"
 
 - name: Project Request Template
   hosts: masters
   gather_facts: False
   become: yes
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/configs/env_vars.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
   tags:
     - env-specific
     - project_request
   tasks:
     - name: Copy project request template to master
       copy:
-        src: ./config/project-template.yml
-        dest: /root/project-template.yml
+        src: "{{ ANSIBLE_REPO_PATH }}/config/proj_template.yml"
+        dest: /root/proj_template.yml
 
     - name: Check for project request template
       command: "oc get template project-request -n default"
@@ -135,7 +135,7 @@
       ignore_errors: true
 
     - name: Create project request template in default project
-      shell: "oc create -f /root/project-template.yml -n default || oc replace -f /root/project-template.yml -n default"
+      shell: "oc create -f /root/proj_template.yml -n default || oc replace -f /root/proj_template.yml -n default"
       when: request_template | failed
 
     - name: Update master config file to use project request template
@@ -176,20 +176,20 @@
         - master_config.changed
         - osrelease is version_compare('3.10', '>=')
 
-- name: node admin configs
-  hosts: nodes
-  gather_facts: False
-  become: yes
-  vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
-  tags:
-    - env-specific
-    - env_specific_images
-  tasks:
-    - name: 'Pull Env Specific Images'
-      command: "docker pull {{ item }}"
-      with_items: '{{ env_specific_images }}'
-      when: env_specific_images.0 is defined
+#- name: node admin configs
+#  hosts: nodes
+#  gather_facts: False
+#  become: yes
+#  vars_files:
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
+#  tags:
+#    - env-specific
+#    - env_specific_images
+#  tasks:
+#    - name: 'Pull Env Specific Images'
+#      command: "docker pull {{ item }}"
+#      with_items: '{{ env_specific_images }}'
+#      when: env_specific_images.0 is defined
 
 - name: Import jenkins images for OCP 3.7 and newer
   hosts: masters
@@ -197,7 +197,7 @@
   become: yes
   gather_facts: False
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
   tags:
     - env-specific
     - env_specific_images
@@ -233,10 +233,10 @@
   become: yes
   hosts:
     - nodes
-    - infranodes
+#    - infranodes
     - masters
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/configs/env_vars.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
   tags:
     - env-specific
     - install_nfs
@@ -274,7 +274,7 @@
   hosts: masters
   run_once: true
   vars_files:
-    - "{{ ANSIBLE_REPO_PATH }}/configs/env_vars.yml"
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
   tasks:
     - name: Patch dockergc DaemonSet
       shell: "oc patch daemonset dockergc --patch='\"spec\": { \"template\": { \"spec\": { \"containers\": [ { \"command\": [ \"/usr/bin/oc\" ], \"name\": \"dockergc\" } ] } } }' -n default"
@@ -297,7 +297,7 @@
 #  gather_facts: False
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #  tags:
 #    - env-specific
 #    - install_openwhisk
@@ -318,7 +318,7 @@
 #    - masters
 #    - bastions
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
 #  tags:
 #    - install_prometheus
@@ -337,7 +337,7 @@
 #  hosts:
 #    - infranodes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #  tags:
 #    - install_prometheus
 #  tasks:
@@ -354,7 +354,7 @@
 #    - bastions
 #  run_once: true
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #  tags:
 #    - install_prometheus
 #  tasks:
@@ -377,7 +377,7 @@
 #    - infranodes
 #    - masters
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
 #  tags:
 #    - install_prometheus
@@ -414,7 +414,7 @@
 #  gather_facts: False
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #  roles:
 #    - role: "{{ ANSIBLE_REPO_PATH }}/roles/install-nexus"
 #      desired_project: "{{admin_project}}"
@@ -430,7 +430,7 @@
 #  gather_facts: False
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/configs/env_vars.yml"
 #  tags:
 #    - env-specific
 #    - install_aws_broker
@@ -445,7 +445,7 @@
 #  gather_facts: False
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #  tags:
 #    - env-specific
 #    - install_openshiftapb
@@ -459,7 +459,7 @@
 #  gather_facts: true
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
 #  vars:
 #    zabbix_auto_registration_keyword: OCP Master
@@ -481,7 +481,7 @@
 #  gather_facts: true
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
 #  vars:
 #    zabbix_auto_registration_keyword: OCP Node
@@ -503,7 +503,7 @@
 #  gather_facts: true
 #  become: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
 #  vars:
 #    zabbix_auto_registration_keyword: OCP Host
@@ -520,7 +520,7 @@
 #  gather_facts: False
 #  run_once: yes
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
 #    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
 #  tasks:
 #    # start supporting this only for OCP >= 3.9
@@ -560,27 +560,14 @@
 #            msg: "FAIL {{ project_tag }} Diagnostics"
 #          when: r_diag is failed
 
-#- name: Configure IPA on bastion
-#  hosts: bastions
-#  become: yes
-#  gather_facts: False
-#  run_once: yes
-#  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
-#  tasks:
-#    - import_role:
-#        name: "{{ ANSIBLE_REPO_PATH }}/roles/bastion-opentlc-ipa"
-#      when: install_ipa_client|bool
-
 #- name: PostSoftware flight-check
 #  hosts: localhost
 #  connection: local
 #  gather_facts: false
 #  become: false
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_secret_vars.yml"
 #  tags:
 #    - post_flight_check
 #  tasks:
@@ -591,8 +578,8 @@
 #  hosts:
 #    - all
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_secret_vars.yml"
 #  gather_facts: true
 #  tags:
 #    - ocp_report
@@ -603,8 +590,8 @@
 #  become: false
 #
 #  vars_files:
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_vars.yml"
-#    - "{{ ANSIBLE_REPO_PATH }}/configs/{{ env_type }}/env_secret_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
+#    - "{{ ANSIBLE_REPO_PATH }}/config/env_secret_vars.yml"
 #  tags:
 #    - ocp_report
 #  vars:
