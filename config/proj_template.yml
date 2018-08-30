@@ -99,6 +99,21 @@ objects:
           memory: "100Mi"
 #        maxLimitRequestRatio:
 #          cpu: "40"
+- apiVersion: v1
+  kind: "ResourceQuota"
+  metadata:
+    name: "core-resource-quota"
+  spec:
+    hard:
+      pods: "100" 
+      cpu: "30"
+      memory: 30Gi
+      requests.cpu: "20" 
+      requests.memory: 10Gi 
+      limits.cpu: "30" 
+      limits.memory: 40Gi
+    scopes:
+    - NotTerminating
 parameters:
 - name: PROJECT_NAME
 - name: PROJECT_DISPLAYNAME

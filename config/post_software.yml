@@ -124,27 +124,27 @@
     - env-specific
     - project_request
   tasks:
-#    - name: Copy project request template to master
-#      copy:
-#        src: "{{ ANSIBLE_REPO_PATH }}/config/proj_template.yml"
-#        dest: /root/proj_template.yml
-#
-#    - name: Check for project request template
-#      command: "oc get template project-request -n default"
-#      register: request_template
-#      ignore_errors: true
-#
-#    - name: Create project request template in default project
-#      shell: "oc create -f /root/proj_template.yml -n default || oc replace -f /root/proj_template.yml -n default"
-#      when: request_template | failed
-#
-#    - name: Update master config file to use project request template
-#      lineinfile:
-#        regexp: "  projectRequestTemplate"
-#        dest: "/etc/origin/master/master-config.yaml"
-#        line: '  projectRequestTemplate: "default/project-request"'
-#        state: present
-#      register: master_config
+    - name: Copy project request template to master
+      copy:
+        src: "{{ ANSIBLE_REPO_PATH }}/config/proj_template.yml"
+        dest: /root/proj_template.yml
+
+    - name: Check for project request template
+      command: "oc get template project-request -n default"
+      register: request_template
+      ignore_errors: true
+
+    - name: Create project request template in default project
+      shell: "oc create -f /root/proj_template.yml -n default || oc replace -f /root/proj_template.yml -n default"
+      when: request_template | failed
+
+    - name: Update master config file to use project request template
+      lineinfile:
+        regexp: "  projectRequestTemplate"
+        dest: "/etc/origin/master/master-config.yaml"
+        line: '  projectRequestTemplate: "default/project-request"'
+        state: present
+      register: master_config
 
     - name: Add Project request message
       replace:
