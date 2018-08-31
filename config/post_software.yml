@@ -1,3 +1,4 @@
+# vim: set ft=ansible:
 ---
 
 #- name: For CNS change default storage class to glusterfs-storage

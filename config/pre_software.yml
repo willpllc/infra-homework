@@ -1,0 +1,17 @@
+# vim: set ft=ansible:
+---
+
+######################## Pre-software
+- name: Pre-Software work
+  hosts: all
+  become: yes
+  vars_files:
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
+  gather_facts: False
+
+  tasks:
+    - name: Install packages
+      include_tasks: ./packages.yml
+      tags:
+        - install_basic_packages
+

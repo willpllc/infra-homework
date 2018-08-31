@@ -1,4 +1,4 @@
-# #
+# vim: set ft=ansible:
 
 cicd_project: 'cicd'
 company_projs:

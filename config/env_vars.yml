@@ -1,3 +1,4 @@
+# vim: set ft=ansible:
 ###### VARIABLES YOU SHOULD CONFIGURE FOR YOUR DEPLOYEMNT
 ###### OR PASS as "-e" args to ansible-playbook command
 # #
@@ -12,10 +13,10 @@
 install_ipa_client: false
 repo_method: file
 ocp_pvs:
-  # - es-storage
-  # - nexus
-  # - nexus2
-  # - nexus3
+# - es-storage
+# - nexus
+# - nexus2
+# - nexus3
 config_nfs_uservols: "true"
 user_vols: 50
 user_vols_size: 4Gi
@@ -58,8 +59,14 @@ install_bastion: false
 env_authorized_key: "{{guid}}key"
 set_env_authorized_key: true
 software_to_deploy: "openshift"
+#If using repo_method: satellite, you must set these values as well.
+# satellite_url: https://satellite.example.com
+# satellite_org: Sat_org_name
+# satellite_activationkey: "rhel7basic"
+
+
 ################################################################################
-#### OCP IMPLEMENATATION LAB
+#### OCP IMPLEMENTATION LAB
 ################################################################################
 
 repo_version: '3.9'
@@ -70,29 +77,30 @@ master_public_dns: "loadbalancer.{{subdomain_base}}."
 #### Common host variables
 ################################################################################
 
-update_packages: false
+# Do you want to run a full yum update
+update_packages: true
 common_packages:
-  - python
-  - unzip
-  - bash-completion
-  - tmux
-  - bind-utils
-  - wget
-  - git
-  - vim-enhanced
-  - ansible
-  - net-tools
-  - iptables-services
-  - bridge-utils
-  - sos
-  - psacct
+- python
+- unzip
+- bash-completion
+- tmux
+- bind-utils
+- wget
+- git
+- vim-enhanced
+- ansible
+- net-tools
+- iptables-services
+- bridge-utils
+- sos
+- psacct
 
 rhel_repos:
-  - rhel-7-server-rpms
-  - rhel-7-server-extras-rpms
-  - rhel-7-server-ose-{{repo_version}}-rpms
-  - rhel-7-server-ansible-2.4-rpms
-  - rh-gluster-3-client-for-rhel-7-server-rpms
+- rhel-7-server-rpms
+- rhel-7-server-extras-rpms
+- rhel-7-server-ose-{{repo_version}}-rpms
+- rhel-7-server-ansible-2.4-rpms
+- rh-gluster-3-client-for-rhel-7-server-rpms
 
 use_subscription_manager: false
 use_own_repos: true

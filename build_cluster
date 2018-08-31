@@ -64,6 +64,17 @@ echo ""
 #read j
 
 echo ""
+echo "Pre-software OCP cluster config on ${GUID}"
+echo ""
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/pre_software.yml
+
+echo ""
+echo "Completed Pre-software OCP cluster config on ${GUID}"
+echo ""
+
+#read j
+
+echo ""
 echo "Building OCP cluster on ${GUID}"
 echo ""
 ansible-playbook -i workdir/hosts -f 20 /usr/share/ansible/openshift-ansible/playbooks/deploy_cluster.yml
