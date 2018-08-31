@@ -7,28 +7,28 @@
   vars_files:
     - "{{ ANSIBLE_REPO_PATH }}/config/clients_env_var.yml"
   tasks:
-    - name: Check to see if Jenkins is already setup
-      shell: "oc get svc/jenkins -n {{ cicd_project }}"
-      register: jenkins_chk
-      failed_when: false
-      changed_when: false
-      ignore_errors: yes
+#    - name: Check to see if Jenkins is already setup
+#      shell: "oc get svc/jenkins -n {{ cicd_project }}"
+#      register: jenkins_chk
+#      failed_when: false
+#      changed_when: false
+#      ignore_errors: yes
 
-    - name: Setup Persistent Jenkins
-      shell: "oc new-app jenkins-persistent --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n {{ cicd_project }} >/dev/null 2>&1"
-      check_mode: no
-      when: jenkins_chk.rc != 0
+#    - name: Setup Persistent Jenkins
+#      shell: "oc new-app jenkins-persistent --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi -n {{ cicd_project }} >/dev/null 2>&1"
+#      check_mode: no
+#      when: jenkins_chk.rc != 0
 
-    - name: Increase CPU resources for Jenkins
-      shell: "oc set resources dc jenkins --limits=cpu=2 --requests=cpu=1 -n {{ cicd_project }} >/dev/null 2>&1"
-      check_mode: no
-      when: jenkins_chk.rc != 0
+#    - name: Increase CPU resources for Jenkins
+#      shell: "oc set resources dc jenkins --limits=cpu=2 --requests=cpu=1 -n {{ cicd_project }} >/dev/null 2>&1"
+#      check_mode: no
+#      when: jenkins_chk.rc != 0
 
-    - name: Pause for Jenkins to start - 2 mins
-      shell: "sleep 120"
-      check_mode: no
-      changed_when: false
-      when: jenkins_chk.rc != 0
+#    - name: Pause for Jenkins to start - 2 mins
+#      shell: "sleep 120"
+#      check_mode: no
+#      changed_when: false
+#      when: jenkins_chk.rc != 0
 
 
 #    - name: Check if CI/CD pipeline template has been uploaded
@@ -50,8 +50,8 @@
       check_mode: no
 #      when: jenkins_chk.rc != 0
 
-    - name: Pause for Pipeline to be setup - 4 mins
-      shell: "sleep 240"
+    - name: Pause for Pipeline to be setup - 5 mins
+      shell: "sleep 300"
       check_mode: no
       changed_when: false
 #      when: jenkins_chk.rc != 0

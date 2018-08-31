@@ -129,15 +129,15 @@
         src: "{{ ANSIBLE_REPO_PATH }}/config/proj_template.yml"
         dest: /root/proj_template.yml
 
-    - name: Check for project request template
-      command: "oc get template project-request -n default"
-      register: request_template
-      ignore_errors: true
-      failed_when: false
+#    - name: Check for project request template
+#      command: "oc get template project-request -n default"
+#      register: request_template
+#      ignore_errors: true
+#      failed_when: false
 
     - name: Create project request template in default project
       shell: "oc create -f /root/proj_template.yml -n default || oc replace -f /root/proj_template.yml -n default"
-      when: request_template | failed
+#      when: request_template | failed
 
     - name: Update master config file to use project request template
       lineinfile:

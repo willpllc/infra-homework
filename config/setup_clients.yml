@@ -145,6 +145,11 @@
       check_mode: no
       with_items: "{{ company_projs }}"
 
+    - name: Update cicd project
+      shell: "oc delete resourcequotas core-resource-quota -n {{ cicd_project }} >/dev/null 2>&1"
+      ignore_errors: yes
+      check_mode: no
+
     - name: Wait for things to complete
       shell: "sleep 5"
       changed_when: false

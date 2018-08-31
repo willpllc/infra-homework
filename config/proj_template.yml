@@ -83,20 +83,20 @@ objects:
           memory: "8Gi"
         min:
           cpu: "100m"
-          memory: "6Mi"
+          memory: "200Mi"
       - type: "Container"
         max:
           cpu: "4"
           memory: "8Gi"
         min:
-          cpu: "50m"
-          memory: "4Mi"
-        default:
-          cpu: "500m"
+          cpu: "100m"
           memory: "200Mi"
+        default:
+          cpu: "2"
+          memory: "1Gi"
         defaultRequest:
           cpu: "200m"
-          memory: "100Mi"
+          memory: "500Mi"
 #        maxLimitRequestRatio:
 #          cpu: "40"
 - apiVersion: v1
