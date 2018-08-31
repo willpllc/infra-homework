@@ -87,7 +87,7 @@ objects:
       - type: "Container"
         max:
           cpu: "4"
-          memory: "4Gi"
+          memory: "8Gi"
         min:
           cpu: "50m"
           memory: "4Mi"

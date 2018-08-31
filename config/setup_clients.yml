@@ -61,7 +61,6 @@
       shell: "{{ ANSIBLE_REPO_PATH }}/scripts/set_node_selector {{ item.item.proj }} {{ item.item.client }}"
 #      shell: "oc patch namespace beta-dev -p '{"metadata":{"annotations":{"openshift.io/node-selector":"env=app,client=beta"}}}'"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
-#HERE
       ignore_errors: yes
       check_mode: no
       when: "{{ item.rc }} != 0"
@@ -77,6 +76,12 @@
       check_mode: no
       with_items: "{{ proj_chk.results }}"
 
+#    - name: Delete limits for cicd
+#      shell: "oc delete limits core-resource-limits -n {{ cicd_project }} >/dev/null 2>&1"
+#      ignore_errors: yes
+#      check_mode: no
+#      with_items: "{{ proj_chk.results }}"
+#
     - name: Check for Users
       shell: "oc get user {{ item.key }} >/dev/null 2>&1"
       with_dict: "{{ company_users }}"

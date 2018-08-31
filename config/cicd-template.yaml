@@ -19,7 +19,7 @@ parameters:
   name: STAGE_PROJECT
   required: true
 - displayName: PROD project name
-  value: stage
+  value: prod
   name: PROD_PROJECT
   required: true
 - displayName: Deploy Eclipse Che
