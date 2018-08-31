@@ -13,4 +13,4 @@ scripts/*.rc
 wk*.rc
 .idea
 *.rc
-
+typescript

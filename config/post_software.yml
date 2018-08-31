@@ -133,6 +133,7 @@
       command: "oc get template project-request -n default"
       register: request_template
       ignore_errors: true
+      failed_when: false
 
     - name: Create project request template in default project
       shell: "oc create -f /root/proj_template.yml -n default || oc replace -f /root/proj_template.yml -n default"

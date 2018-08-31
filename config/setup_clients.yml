@@ -1,6 +1,6 @@
 ---
 
-- name: Create projects
+- name: Create Clients
   hosts: localhost
   gather_facts: False
   become: yes
@@ -49,8 +49,17 @@
 #    - debug: var=proj_chk
 
     - name: Create Company projects
-      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
-#      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+#      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+#      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
+      ignore_errors: yes
+      check_mode: no
+      when: "{{ item.rc }} != 0"
+      with_items: "{{ proj_chk.results }}"
+
+    - name: Set node-selector for projects
+#      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
       ignore_errors: yes
       check_mode: no
@@ -103,8 +112,13 @@
       failed_when: false
       check_mode: no
 
-    - name: Add admin for cicd
-      shell: "oc adm policy add-role-to-user admin steve -n {{ cicd_project }}"
+    - name: Add cluster-admins
+      shell: "oc adm policy add-cluster-role-to-user cluster-admin {{ item.key }} >/dev/null 2>&1"
+      with_dict: "{{ cadmins_users }}"
+      register: cadmins_chk
+      failed_when: false
+      changed_when: false
+      ignore_errors: yes
 
     - name: Add admin for projects
       shell: "oc adm policy add-role-to-user admin {{ item.1.admin }} -n {{ item.0.proj }}"
