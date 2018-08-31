@@ -58,9 +58,10 @@
       with_items: "{{ proj_chk.results }}"
 
     - name: Set node-selector for projects
-#      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
-      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/set_node_selector {{ item.item.proj }} {{ item.item.client }}"
+#      shell: "oc patch namespace beta-dev -p '{"metadata":{"annotations":{"openshift.io/node-selector":"env=app,client=beta"}}}'"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
+#HERE
       ignore_errors: yes
       check_mode: no
       when: "{{ item.rc }} != 0"
