@@ -47,19 +47,16 @@
     - name: Create pipeline for common
       shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param PROD_PROJECT=common-prod --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
 #      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
-#      shell: "oc new-app -f cicd-pipeline --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param=WITH_CHE=false --param=EPHEMERAL=false -n {{ cicd_project }}"
       check_mode: no
 #      when: jenkins_chk.rc != 0
 
-    - name: Pause for Pipeline to be setup - 5 mins
-      shell: "sleep 300"
-      check_mode: no
-      changed_when: false
-#      when: jenkins_chk.rc != 0
+#    - name: Pause for Pipeline to be setup - 5 mins
+#      shell: "sleep 300"
+#      check_mode: no
+#      changed_when: false
 
-    - name: Start tasks-pipeline build
-      shell: "oc start-build tasks-pipeline -n cicd"
-      check_mode: no
-#      when: jenkins_chk.rc != 0
+#    - name: Start tasks-pipeline build
+#      shell: "oc start-build tasks-pipeline -n cicd"
+#      check_mode: no
 
 
