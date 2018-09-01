@@ -115,6 +115,23 @@
 #      - name: allow our-proj-prov members to provision their own projects
 #        command: "oc adm policy add-cluster-role-to-group self-provisioner our-proj-prov"
 
+- name: Label default namespace
+  hosts: masters[0]
+  gather_facts: False
+  become: yes
+  vars_files:
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
+  tags:
+    - netplugin-specific
+    - project_request
+  tasks:
+    - name: Make default project global for networkpolicy via label
+      command: "oc label namespace default name=default"
+      when: ovs_plugin == "networkpolicy"
+      ignore_errors: true
+      failed_when: false
+#HERE
+
 - name: Project Request Template
   hosts: masters
   gather_facts: False
@@ -125,10 +142,6 @@
     - env-specific
     - project_request
   tasks:
-    - name: Make default project global for networkpolicy via label
-      command: "oc label namespace default name=default"
-      when: ovs_plugin == "networkpolicy"
-
     - name: Copy project request template to master
       copy:
         src: "{{ ANSIBLE_REPO_PATH }}/config/proj_template.yml"

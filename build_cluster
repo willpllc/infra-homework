@@ -83,7 +83,9 @@ echo ""
 echo "Built Cluster ${GUID}"
 echo ""
 
-#read j
+read j
+
+ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
 
 echo ""
 echo "Post-software OCP cluster config on ${GUID}"
@@ -94,9 +96,7 @@ echo ""
 echo "Completed Post-software OCP cluster config on ${GUID}"
 echo ""
 
-#read j
-
-ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
+read j
 
 echo ""
 echo "Setup storage for OCP cluster on ${GUID}"
@@ -107,12 +107,12 @@ echo ""
 echo "Setup storage Complete"
 echo ""
 
-#read j
+read j
 
 echo ""
 echo "Setup Accounts and Projects"
 echo ""
-#ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_clients.yml
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_clients.yml
 
 echo ""
 echo "Account/Projects setup complete"
@@ -122,7 +122,7 @@ echo ""
 echo ""
 echo "Setup CI/CD"
 echo ""
-#ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_cicd.yml
+ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_cicd.yml
 
 echo ""
 echo "CICD Setup complete"
