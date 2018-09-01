@@ -125,6 +125,10 @@
     - env-specific
     - project_request
   tasks:
+    - name: Make default project global for networkpolicy via label
+      command: "oc label namespace default name=default"
+      when: ovs_plugin == "networkpolicy"
+
     - name: Copy project request template to master
       copy:
         src: "{{ ANSIBLE_REPO_PATH }}/config/proj_template.yml"

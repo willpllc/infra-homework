@@ -114,6 +114,37 @@ objects:
       limits.memory: 40Gi
     scopes:
     - NotTerminating
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: allow-from-same-namespace
+  spec:
+    podSelector:
+    ingress:
+    - from:
+      - podSelector: {}
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: allow-from-default-namespace
+  spec:
+    podSelector:
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: default
+- apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: allow-from-cicd-namespace
+  spec:
+    podSelector:
+    ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: cicd
 parameters:
 - name: PROJECT_NAME
 - name: PROJECT_DISPLAYNAME
