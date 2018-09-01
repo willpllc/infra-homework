@@ -50,13 +50,13 @@
       check_mode: no
 #      when: jenkins_chk.rc != 0
 
-#    - name: Pause for Pipeline to be setup - 5 mins
-#      shell: "sleep 300"
-#      check_mode: no
-#      changed_when: false
+    - name: Pause for Pipeline to be setup - 5 mins
+      shell: "sleep 300"
+      check_mode: no
+      changed_when: false
 
-#    - name: Start tasks-pipeline build
-#      shell: "oc start-build tasks-pipeline -n cicd"
-#      check_mode: no
+    - name: Start tasks-pipeline build
+      shell: "oc start-build tasks-pipeline -n cicd"
+      check_mode: no
 
 

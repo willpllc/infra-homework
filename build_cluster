@@ -4,6 +4,7 @@
 # Global Variables
 #
 BASENAME=$0
+#DEBUG=0
 
 #
 # Check effective UID
@@ -61,7 +62,10 @@ echo ""
 echo "Inventory built at workdir/hosts"
 echo ""
 
-#read j
+if [ -n "${DEBUG}" ]; then
+  echo "pause"
+  read j
+fi
 
 echo ""
 echo "Pre-software OCP cluster config on ${GUID}"
@@ -72,7 +76,10 @@ echo ""
 echo "Completed Pre-software OCP cluster config on ${GUID}"
 echo ""
 
-#read j
+if [ -n "${DEBUG}" ]; then
+  echo "pause"
+  read j
+fi
 
 echo ""
 echo "Building OCP cluster on ${GUID}"
@@ -83,7 +90,10 @@ echo ""
 echo "Built Cluster ${GUID}"
 echo ""
 
-read j
+if [ -n "${DEBUG}" ]; then
+  echo "pause"
+  read j
+fi
 
 ansible -i workdir/hosts masters[0] -b -m fetch -a "src=/root/.kube/config dest=/root/.kube/config flat=yes"
 
@@ -96,7 +106,10 @@ echo ""
 echo "Completed Post-software OCP cluster config on ${GUID}"
 echo ""
 
-read j
+if [ -n "${DEBUG}" ]; then
+  echo "pause"
+  read j
+fi
 
 echo ""
 echo "Setup storage for OCP cluster on ${GUID}"
@@ -107,7 +120,10 @@ echo ""
 echo "Setup storage Complete"
 echo ""
 
-read j
+if [ -n "${DEBUG}" ]; then
+  echo "pause"
+  read j
+fi
 
 echo ""
 echo "Setup Accounts and Projects"
@@ -118,6 +134,10 @@ echo ""
 echo "Account/Projects setup complete"
 echo ""
 
+if [ -n "${DEBUG}" ]; then
+  echo "pause"
+  read j
+fi
 
 echo ""
 echo "Setup CI/CD"
