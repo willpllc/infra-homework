@@ -8,7 +8,7 @@
   vars_files:
     - "{{ ANSIBLE_REPO_PATH }}/config/clients_env_var.yml"
   tasks:
-    - name: Unique list of clients
+    - name: Unique list of nodes
       shell: "oc get nodes -lenv=app -o custom-columns=NAME:.metadata.name --sort-by=.metadata.name --no-headers=true 2>/dev/null"
       register: app_node_list
 #      ignore_errors: yes
@@ -71,7 +71,7 @@
       shell: "sleep 5"
       changed_when: false
 
-    - name: Label Company namespaces
+    - name: Label client namespaces
       shell: "oc label namespace {{ item.item.proj }} client={{ item.item.client }}"
       ignore_errors: yes
       check_mode: no
@@ -104,6 +104,7 @@
       failed_when: false
       changed_when: false
       ignore_errors: yes
+
     - name: Create Identies
       shell: "oc create identity htpasswd_auth:{{ item.item.key }} >/dev/null 2>&1"
       ignore_errors: yes
@@ -126,13 +127,52 @@
       failed_when: false
       changed_when: false
       ignore_errors: yes
+      check_mode: no
 
-    - name: Add admin for projects
-      shell: "oc adm policy add-role-to-user admin {{ item.1.admin }} -n {{ item.0.proj }}"
-#      debug: msg="0 is {{ item.0.proj }} admin is {{ item.1.admin }}"
+#    - name: Add admin for projects
+#      shell: "oc adm policy add-role-to-user admin {{ item.1 }} -n {{ item.0.proj }}"
+##      debug: msg="0 is {{ item.0.proj }} admin is {{ item.1 }}"
+#      with_subelements:
+#        - "{{ company_projs }}"
+#        - users
+
+    - name: Create group for each client
+      shell: "oc adm groups new client-group-{{ item }}"
+      with_items: "{{ company_projs | map(attribute='client') | list | unique }}"
+      failed_when: false
+      ignore_errors: yes
+      check_mode: no
+
+    - name: Add users to groups
+      shell: "oc adm groups add-users client-group-{{ item.0.client }} {{ item.1 }}"
       with_subelements:
         - "{{ company_projs }}"
-        - admins
+        - users
+      failed_when: false
+      ignore_errors: yes
+      check_mode: no
+
+    - name: Add label to group
+      shell: "oc label group/client-group-{{ item }} client={{ item }}"
+      with_items: "{{ company_projs | map(attribute='client') | list | unique }}"
+      failed_when: false
+      ignore_errors: yes
+      check_mode: no
+
+#HERE
+    - name: Add admin role for group to projects
+      shell: "oc adm policy add-role-to-group admin client-group-{{ item.client }} -n {{ item.proj }}"
+#      shell: "oc adm policy add-role-to-group basic-user client-group-{{ item.client }} -n {{ item.proj }}"
+      with_items: "{{ company_projs }}"
+      failed_when: false
+      ignore_errors: yes
+      check_mode: no
+
+#      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/label_node {{ item.0 }} {{ item.1 }}"
+#      when: item.0 != ""
+#      with_together:
+#        - "{{ company_projs | map(attribute='client') | list | unique }}"
+#        - "{{ app_node_list.stdout_lines }}"
 
     - name: Add jenkins service account to projects
       shell: "oc policy add-role-to-user edit system:serviceaccount:{{ cicd_project }}:jenkins -n {{ item.proj }} >/dev/null 2>&1"

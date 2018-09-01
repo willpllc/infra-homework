@@ -66,7 +66,7 @@ echo ""
 echo ""
 echo "Pre-software OCP cluster config on ${GUID}"
 echo ""
-ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/pre_software.yml
+ansible-playbook -i workdir/hosts -f 20 -e "ANSIBLE_REPO_PATH=`pwd`" config/pre_software.yml
 
 echo ""
 echo "Completed Pre-software OCP cluster config on ${GUID}"
@@ -112,7 +112,7 @@ echo ""
 echo ""
 echo "Setup Accounts and Projects"
 echo ""
-ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_clients.yml
+#ansible-playbook -i workdir/hosts -e "ANSIBLE_REPO_PATH=`pwd`" config/setup_clients.yml
 
 echo ""
 echo "Account/Projects setup complete"
