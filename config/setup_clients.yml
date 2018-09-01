@@ -6,6 +6,7 @@
   gather_facts: False
   become: yes
   vars_files:
+    - "{{ ANSIBLE_REPO_PATH }}/config/env_vars.yml"
     - "{{ ANSIBLE_REPO_PATH }}/config/clients_env_var.yml"
   tasks:
     - name: Unique list of nodes
@@ -76,6 +77,7 @@
       ignore_errors: yes
       check_mode: no
       with_items: "{{ proj_chk.results }}"
+      failed_when: false
 
 #    - name: Delete limits for cicd
 #      shell: "oc delete limits core-resource-limits -n {{ cicd_project }} >/dev/null 2>&1"
@@ -185,11 +187,14 @@
       ignore_errors: yes
       check_mode: no
       with_items: "{{ company_projs }}"
+      when: ovs_plugin == "multitenant"
+      failed_when: false
 
     - name: Update cicd project
       shell: "oc delete resourcequotas core-resource-quota -n {{ cicd_project }} >/dev/null 2>&1"
       ignore_errors: yes
       check_mode: no
+      failed_when: false
 
     - name: Wait for things to complete
       shell: "sleep 5"
