@@ -31,18 +31,18 @@ company_projs:
       - brian
       - betty
     client: beta
-  - proj: common-dev
-    display: "Common - Dev"
+  - proj: cicd-dev
+    display: "CICD - Dev"
     users:
       - steve
     client: common
-  - proj: common-stage
-    display: "Common - Stage"
+  - proj: cicd-test
+    display: "CICD - Stage"
     users:
       - steve
     client: common
-  - proj: common-prod
-    display: "Common - Prod"
+  - proj: cicd-prod
+    display: "CICD - Prod"
     users:
       - steve
     client: common
