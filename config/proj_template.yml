@@ -106,8 +106,8 @@ objects:
   spec:
     hard:
       pods: "100" 
-      cpu: "30"
-      memory: 30Gi
+#      cpu: "30"
+#      memory: 30Gi
       requests.cpu: "20" 
       requests.memory: 10Gi 
       limits.cpu: "30" 

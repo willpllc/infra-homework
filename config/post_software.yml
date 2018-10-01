@@ -171,13 +171,14 @@
         regexp: 'projectRequestMessage.*'
         replace: "projectRequestMessage: '{{project_request_message}}'"
         backup: yes
+      register: master_config2
 
     - name: Restart master service (Pre 3.7)
       service:
         name: atomic-openshift-master
         state: restarted
       when:
-        - master_config.changed
+        - master_config.changed or master_config2.changed
         - osrelease is version_compare('3.7', '<')
 
     - name: Restart master API service (3.7 - 3.9)
