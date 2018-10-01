@@ -44,9 +44,9 @@
 #      check_mode: no
 #      when: template_chk.rc != 0
 
-    - name: Create pipeline for common/cicd
-      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=cicd-dev --param STAGE_PROJECT=cicd-test --param PROD_PROJECT=cicd-prod --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
-#      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=common-dev --param STAGE_PROJECT=common-stage --param PROD_PROJECT=common-prod --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
+    - name: Create pipeline
+      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param BUILD_PROJECT=tasks-build --param DEV_PROJECT=tasks-dev --param STAGE_PROJECT=tasks-test --param PROD_PROJECT=tasks-prod --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
+#      shell: "oc process -f {{ ANSIBLE_REPO_PATH }}/config/cicd-template.yaml --param DEV_PROJECT=cicd-dev --param STAGE_PROJECT=cicd-test --param PROD_PROJECT=cicd-prod --param=WITH_CHE=false --param=EPHEMERAL=false | oc create -f - -n {{ cicd_project }}"
       check_mode: no
 #      when: jenkins_chk.rc != 0
 
@@ -56,7 +56,7 @@
       changed_when: false
 
     - name: Start tasks-pipeline build
-      shell: "oc start-build tasks-pipeline -n cicd"
+      shell: "oc start-build tasks-pipeline -n {{ cicd_project }}"
       check_mode: no
 
 

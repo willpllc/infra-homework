@@ -10,7 +10,7 @@ if ( scalar(@ARGV) == 2 ) {
 
 #  print("Proj is $proj and client is $client\n");
 
-  my $to_run = "oc patch namespace ".$proj." -p '{\"metadata\":{\"annotations\":{\"openshift.io/node-selector\":\"env=app,client=".$client."\"}}}'";;
+  my $to_run = "oc patch namespace ".$proj." -p '{\"metadata\":{\"annotations\":{\"openshift.io/node-selector\":\"env=app,client=".$client."\"}}}'";
   print("To run $to_run\n");
   `$to_run`;
 

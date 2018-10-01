@@ -276,12 +276,22 @@ openshift_hosted_router_replicas={{infranode_instance_count}}
 openshift_hosted_router_certificate={{lets_encrypt_openshift_hosted_router_certificate|to_json}}
 {% endif %}
 
-openshift_hosted_registry_replicas=1
+openshift_hosted_registry_replicas=2
 openshift_hosted_registry_pullthrough=true
 openshift_hosted_registry_acceptschema2=true
 openshift_hosted_registry_enforcequota=true
 
-{% if s3user_access_key is defined %}
+{% if install_nfs|bool and not install_glusterfs|bool %}
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_nfs_directory=/srv/nfs
+openshift_hosted_registry_storage_nfs_options='*(rw,root_squash)'
+openshift_hosted_registry_storage_volume_name=registry
+openshift_hosted_registry_storage_volume_size=20Gi
+openshift_hosted_registry_pullthrough=true
+openshift_hosted_registry_acceptschema2=true
+openshift_hosted_registry_enforcequota=true
+{% elif s3user_access_key is defined %}
 # Registry AWS S3
 # S3 bucket must already exist.
 openshift_hosted_registry_storage_kind=object

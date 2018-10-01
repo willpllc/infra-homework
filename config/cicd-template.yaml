@@ -10,16 +10,20 @@ metadata:
   name: cicd-pipeline
 message: "Use the following credentials for login:\nJenkins: use your OpenShift credentials\nNexus: admin/admin123\nSonarQube: admin/admin\nGogs Git Server: gogs/gogs"
 parameters:
+- displayName: BUILD project name
+  value: tasks-build
+  name: BUILD_PROJECT
+  required: true
 - displayName: DEV project name
-  value: dev
+  value: tasks-dev
   name: DEV_PROJECT
   required: true
 - displayName: STAGE project name
-  value: stage
+  value: tasks-test
   name: STAGE_PROJECT
   required: true
 - displayName: PROD project name
-  value: prod
+  value: tasks-prod
   name: PROD_PROJECT
   required: true
 - displayName: Deploy Eclipse Che
@@ -72,6 +76,8 @@ objects:
     strategy:
       jenkinsPipelineStrategy:
         env:
+        - name: BUILD_PROJECT
+          value: ${BUILD_PROJECT}
         - name: DEV_PROJECT
           value: ${DEV_PROJECT}
         - name: STAGE_PROJECT
@@ -118,7 +124,7 @@ objects:
                 when {
                   expression {
                     openshift.withCluster() {
-                      openshift.withProject(env.DEV_PROJECT) {
+                      openshift.withProject(env.BUILD_PROJECT) {
                         return !openshift.selector("bc", "tasks").exists();
                       }
                     }
@@ -127,7 +133,7 @@ objects:
                 steps {
                   script {
                     openshift.withCluster() {
-                      openshift.withProject(env.DEV_PROJECT) {
+                      openshift.withProject(env.BUILD_PROJECT) {
                         openshift.newBuild("--name=tasks", "--image-stream=jboss-eap70-openshift:1.5", "--binary=true")
                       }
                     }
@@ -141,38 +147,8 @@ objects:
                   
                   script {
                     openshift.withCluster() {
-                      openshift.withProject(env.DEV_PROJECT) {
+                      openshift.withProject(env.BUILD_PROJECT) {
                         openshift.selector("bc", "tasks").startBuild("--from-dir=oc-build", "--wait=true")
-                      }
-                    }
-                  }
-                }
-              }
-              stage('Create DEV') {
-                when {
-                  expression {
-                    openshift.withCluster() {
-                      openshift.withProject(env.DEV_PROJECT) {
-                        return !openshift.selector('dc', 'tasks').exists()
-                      }
-                    }
-                  }
-                }
-                steps {
-                  script {
-                    openshift.withCluster() {
-                      openshift.withProject(env.DEV_PROJECT) {
-                        def app = openshift.newApp("tasks:latest")
-                        app.narrow("svc").expose();
-
-                        openshift.set("probe dc/tasks --readiness --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
-                        openshift.set("probe dc/tasks --liveness  --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
-
-                        def dc = openshift.selector("dc", "tasks")
-                        while (dc.object().spec.replicas != dc.object().status.availableReplicas) {
-                            sleep 10
-                        }
-                        openshift.set("triggers", "dc/tasks", "--manual")
                       }
                     }
                   }
@@ -182,9 +158,19 @@ objects:
                 steps {
                   script {
                     openshift.withCluster() {
+                      openshift.tag("${env.BUILD_PROJECT}/tasks:latest", "${env.DEV_PROJECT}/tasks:${version}")
                       openshift.withProject(env.DEV_PROJECT) {
-                        openshift.selector("dc", "tasks").rollout().latest();
+                        if (openshift.selector('dc', 'tasks').exists()) {
+                          openshift.selector('dc', 'tasks').delete()
+                          openshift.selector('svc', 'tasks').delete()
+                          openshift.selector('route', 'tasks').delete()
+                        }
+
+                        openshift.newApp("tasks:${version}").narrow("svc").expose()
+                        openshift.set("probe dc/tasks --readiness --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
+                        openshift.set("probe dc/tasks --liveness  --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
                       }
+                      openshift.tag("${env.DEV_PROJECT}/tasks:${version}", "${env.DEV_PROJECT}/tasks:candidate")
                     }
                   }
                 }
@@ -193,7 +179,7 @@ objects:
                 steps {
                   script {
                     openshift.withCluster() {
-                      openshift.tag("${env.DEV_PROJECT}/tasks:latest", "${env.STAGE_PROJECT}/tasks:${version}")
+                      openshift.tag("${env.DEV_PROJECT}/tasks:candidate", "${env.STAGE_PROJECT}/tasks:${version}")
                       openshift.withProject(env.STAGE_PROJECT) {
                         if (openshift.selector('dc', 'tasks').exists()) {
                           openshift.selector('dc', 'tasks').delete()
@@ -223,7 +209,7 @@ objects:
                         }
 
                         openshift.newApp("tasks:${version}").narrow("svc").expose()
-                        sh "oc autoscale dc/tasks --min 1 --max 5 --cpu-percent=80 -n ${env.PROD_PROJECT}"
+                        sh "oc autoscale dc/tasks --name=tasks-hpa --min 1 --max 5 --cpu-percent=80 -n ${env.PROD_PROJECT}"
                         openshift.set("probe dc/tasks --readiness --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=30 --failure-threshold=10 --period-seconds=10")
                         openshift.set("probe dc/tasks --liveness  --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10")
                       }

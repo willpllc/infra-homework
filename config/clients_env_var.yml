@@ -1,12 +1,13 @@
 # vim: set ft=ansible:
 
-cicd_project: 'cicd'
-company_projs:
-  - proj: cicd
+cicd_project: 'cicd-dev'
+infra_projs:
+  - proj: cicd-dev
     display: "CI/CD"
     users:
       - steve
     client: build
+company_projs:
   - proj: alpha-dev
     display: "Alpha Corp - Dev"
     users:
@@ -31,18 +32,23 @@ company_projs:
       - brian
       - betty
     client: beta
-  - proj: cicd-dev
-    display: "CICD - Dev"
+  - proj: tasks-build
+    display: "Tasks - Build"
     users:
       - steve
     client: common
-  - proj: cicd-test
-    display: "CICD - Stage"
+  - proj: tasks-dev
+    display: "Tasks - Dev"
     users:
       - steve
     client: common
-  - proj: cicd-prod
-    display: "CICD - Prod"
+  - proj: tasks-test
+    display: "Tasks - Stage"
+    users:
+      - steve
+    client: common
+  - proj: tasks-prod
+    display: "Tasks - Prod"
     users:
       - steve
     client: common

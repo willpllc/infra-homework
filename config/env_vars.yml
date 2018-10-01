@@ -42,7 +42,7 @@ install_lets_encrypt_certificates: false
 install_openwhisk: false
 install_idm: false
 htpasswd_file: "{{ANSIBLE_REPO_PATH}}/config/htpasswd"
-cicd_project: 'cicd'
+cicd_project: 'cicd-dev'
 project_request_message: "Speak to OCP cluster admin to create a project"
 remove_self_provisioners: true
 

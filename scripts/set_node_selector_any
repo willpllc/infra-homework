@@ -1,0 +1,18 @@
+#!/bin/perl
+
+use strict;
+
+
+if ( scalar(@ARGV) == 1 ) {
+
+  my $proj = $ARGV[0];
+#  my $client = $ARGV[1];
+
+#  print("Proj is $proj and client is $client\n");
+
+  my $to_run = "oc patch namespace ".$proj." -p '{\"metadata\":{\"annotations\":{\"openshift.io/node-selector\":\"env=app\"}}}'";
+  print("To run $to_run\n");
+  `$to_run`;
+
+} # end if
+

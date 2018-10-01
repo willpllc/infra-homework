@@ -137,14 +137,14 @@ objects:
 - apiVersion: networking.k8s.io/v1
   kind: NetworkPolicy
   metadata:
-    name: allow-from-cicd-namespace
+    name: allow-from-build-namespace
   spec:
     podSelector:
     ingress:
     - from:
       - namespaceSelector:
           matchLabels:
-            name: cicd
+            client: build
 parameters:
 - name: PROJECT_NAME
 - name: PROJECT_DISPLAYNAME

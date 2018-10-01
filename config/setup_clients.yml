@@ -23,18 +23,27 @@
         - "{{ company_projs | map(attribute='client') | list | unique }}"
         - "{{ app_node_list.stdout_lines }}"
 
-#    - name: Check for project {{ cicd_project }}
-#      shell: "oc get project {{ cicd_project }}"
-#      register: cicd_proj_chk
-#      failed_when: false
-#      changed_when: false
-#      ignore_errors: yes
-#
-#    - name: Create project {{ cicd_project }}
-#      shell: "oc new-project {{ cicd_project }} --display-name='CI/CD' >/dev/null 2>&1"
-#      ignore_errors: yes
-#      check_mode: no
-#      when: cicd_proj_chk.rc != 0
+    - name: Check for CICD projects
+      shell: "oc get project {{ item.proj }}"
+      register: cicd_proj_chk
+      ignore_errors: yes
+      failed_when: false
+      changed_when: false
+      with_items: "{{ infra_projs }}"
+
+    - name: Create CICD projects
+      shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
+      ignore_errors: yes
+      check_mode: no
+      when: "{{ item.rc }} != 0"
+      with_items: "{{ cicd_proj_chk.results }}"
+
+    - name: Set node-selector for CICD projects
+      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/set_node_selector_any {{ item.proj }}"
+#      shell: "oc patch namespace beta-dev -p '{"metadata":{"annotations":{"openshift.io/node-selector":"env=app,client=beta"}}}'"
+      ignore_errors: yes
+      check_mode: no
+      with_items: "{{ infra_projs }}"
 
     - name: Check for Company projects
       shell: "oc get project {{ item.proj }}"
@@ -51,7 +60,6 @@
 #    - debug: var=proj_chk
 
     - name: Create Company projects
-#      shell: "oc adm new-project {{ item.item.proj }} --node-selector='env=app,client={{ item.item.client }}' --display-name='{{ item.item.display }}' >/dev/null 2>&1"
       shell: "oc new-project {{ item.item.proj }} --display-name='{{ item.item.display }}' >/dev/null 2>&1"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
       ignore_errors: yes
@@ -60,17 +68,23 @@
       with_items: "{{ proj_chk.results }}"
 
     - name: Set node-selector for projects
-      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/set_node_selector {{ item.item.proj }} {{ item.item.client }}"
+      shell: "{{ ANSIBLE_REPO_PATH }}/scripts/set_node_selector {{ item.proj }} {{ item.client }}"
 #      shell: "oc patch namespace beta-dev -p '{"metadata":{"annotations":{"openshift.io/node-selector":"env=app,client=beta"}}}'"
 #      debug: msg="proj is {{ item.item.proj }} display is {{ item.item.display }}"
       ignore_errors: yes
       check_mode: no
-      when: "{{ item.rc }} != 0"
-      with_items: "{{ proj_chk.results }}"
+      with_items: "{{ company_projs }}"
 
     - name: Pause for projects to be instantiated
       shell: "sleep 5"
       changed_when: false
+
+    - name: Label CICD namespaces
+      shell: "oc label namespace {{ item.item.proj }} client={{ item.item.client }}"
+      ignore_errors: yes
+      check_mode: no
+      with_items: "{{ cicd_proj_chk.results }}"
+      failed_when: false
 
     - name: Label client namespaces
       shell: "oc label namespace {{ item.item.proj }} client={{ item.item.client }}"
