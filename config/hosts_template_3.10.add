@@ -1,0 +1,9 @@
+
+qe_kubelet_args="[{'key': 'kubeletArguments.pods-per-core', 'value': ['0']}, {'key': 'kubeletArguments.minimum-container-ttl-duration', 'value': ['10s']}, {'key': 'kubeletArguments.maximum-dead-containers-per-container', 'value': ['1']}, {'key': 'kubeletArguments.maximum-dead-containers', 'value': ['20']}, {'key': 'kubeletArguments.image-gc-high-threshold', 'value': ['80']}, {'key': 'kubeletArguments.image-gc-low-threshold', 'value': ['70']}]"
+
+qe_node_group_master="{ 'name': 'qe-master', 'labels': ['node-role.kubernetes.io/master=true'], 'edits': {{ qe_kubelet_args }} }"
+
+# verify the version
+#openshift_image_tag=v3.10.42
+#openshift_release=v3.5
+
