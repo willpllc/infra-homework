@@ -276,7 +276,7 @@ openshift_hosted_router_replicas={{infranode_instance_count}}
 openshift_hosted_router_certificate={{lets_encrypt_openshift_hosted_router_certificate|to_json}}
 {% endif %}
 
-openshift_hosted_registry_replicas=2
+openshift_hosted_registry_replicas={{infranode_instance_count}}
 openshift_hosted_registry_pullthrough=true
 openshift_hosted_registry_acceptschema2=true
 openshift_hosted_registry_enforcequota=true
