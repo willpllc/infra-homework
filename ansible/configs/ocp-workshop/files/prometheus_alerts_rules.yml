@@ -65,4 +65,4 @@ groups:
     annotations:
       component: "dnsmasq"
       severity: "HIGH"
-message: "DNS errors detected. Check grafana for more details"
+      message: "DNS errors detected. Check grafana for more details"
